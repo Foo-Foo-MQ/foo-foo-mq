@@ -68,6 +68,10 @@ const Connection = function (options, connectionFn, channelFn) {
           channel.on('return', (raw) => {
             this.emit('return', raw);
           });
+          channel.on('failed', () => {
+            this.transition('failed');
+            this.handle('failed');
+          });
         });
       } else {
         return Promise.resolve(channel);
