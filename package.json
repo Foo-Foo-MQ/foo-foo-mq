@@ -4,7 +4,7 @@
   "description": "Abstractions to simplify working with the RabbitMQ",
   "main": "src/index.js",
   "engines": {
-    "node": ">=10 <=15"
+    "node": ">=12 <=16"
   },
   "repository": "https://github.com/Foo-Foo-MQ/foo-foo-mq",
   "scripts": {
@@ -95,11 +95,11 @@
     "standard-version": "^9.1.1"
   },
   "dependencies": {
-    "amqplib": "~0.7.1",
+    "amqplib": "~0.8.0",
     "bole": "^4.0.0",
     "debug": "^4.1.1",
     "machina": "^4.0.2",
-    "node-monologue": "^1.0.1",
+    "node-monologue": "^2.0.0",
     "postal": "^2.0.5",
     "uuid": "^8.2.0"
   },
