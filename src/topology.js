@@ -193,7 +193,7 @@ Topology.prototype.createPrimitive = function (Primitive, primitiveType, options
   const definitions = primitiveType === 'exchange' ? this.definitions.exchanges : this.definitions.queues;
   const channelName = `${primitiveType}:${options.name}`;
   let promise = this.promises[channelName];
-  if (!promise) {
+  if (!promise || options.force) {
     this.promises[channelName] = promise = new Promise((resolve, reject) => {
       definitions[options.name] = options;
       const primitive = this.channels[channelName] = new Primitive(options, this.connection, this, this.serializers);
