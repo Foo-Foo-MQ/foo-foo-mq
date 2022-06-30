@@ -1,0 +1,38 @@
+name: Converted Workflow
+'on':
+  push:
+    branches:
+      - convert-travis
+  pull_request:
+    branches:
+      - convert-travis
+jobs:
+  Build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-18.04
+        node-version:
+          - 12.x
+          - 14.x
+          - 16.x
+    runs-on: '${{ matrix.os }}'
+    steps:
+      - name: 'Set up Node.js ${{ matrix.node-version }}'
+        uses: actions/setup-node@v1
+        with:
+          node-version: '${{ matrix.node-version }}'
+      - uses: actions/checkout@v2
+      - run: ls -lha ${{ github.workspace }}
+      - run: cat ${{ github.workspace }}/rabbit_enabled_plugins
+      - run: npm run run-container
+      - run: sleep 10
+      - run: npm i
+      - run: npm run ci-coverage
+      - run: npm run remove-container
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
