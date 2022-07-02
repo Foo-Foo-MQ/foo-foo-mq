@@ -1,7 +1,6 @@
 # Project Specific
 tmp/
 plato/
-package-lock.json
 
 # Logs
 log/

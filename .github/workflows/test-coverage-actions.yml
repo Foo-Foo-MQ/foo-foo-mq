@@ -7,31 +7,24 @@ name: Converted Workflow
     branches:
       - main
 jobs:
-  Build:
+  test:
+    runs-on: ubuntu-latest
     strategy:
+      max-parallel: 1
       matrix:
-        os:
-          - ubuntu-18.04
-        node-version:
-          - 12.x
-          - 14.x
-          - 16.x
-          - 18.x
-    runs-on: '${{ matrix.os }}'
+        node-version: [14.x,16.x,18.x]
     steps:
-      - name: 'Set up Node.js ${{ matrix.node-version }}'
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
-          node-version: '${{ matrix.node-version }}'
-      - uses: actions/checkout@v2
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
       - run: ls -lha ${{ github.workspace }}
-      - run: cat ${{ github.workspace }}/rabbit_enabled_plugins
       - run: npm run run-container
-      - run: sleep 10
-      - run: npm i
+      - run: npm ci
+      - run: sleep 5
       - run: npm run ci-coverage
-      - run: npm run remove-container
-
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
