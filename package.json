@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "engines": {
-    "node": ">=12 <=16"
+    "node": ">=12 <=18"
   },
   "repository": "https://github.com/Foo-Foo-MQ/foo-foo-mq",
   "scripts": {
