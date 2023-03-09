@@ -1,5 +1,3 @@
-/// <reference types="node" />
-
 export = Broker;
 
 declare namespace Broker {
@@ -46,7 +44,7 @@ declare namespace Broker {
   // Publishing
   export function publish<MessageBodyType>(
     exchangeName: string,
-    options: PublishOptions<MessageBodyType>,
+    options: Omit<PublishOptions<MessageBodyType>, "replyTimeout">,
     connectionName?: string
   ): Promise<void>;
   export function request<MessageBodyType, ResponseBodyType>(
@@ -57,21 +55,21 @@ declare namespace Broker {
   export function bulkPublish<MessageBodyType>(
     set:
       | BulkPublishSet<MessageBodyType>
-      | Array<PublishOptions<MessageBodyType>>,
+      | Omit<PublishOptions<MessageBodyType>, "replyTimeout">[],
     connectionName?: string
   ): Promise<void>;
 
   // Receiving
   export function handle<MessageBodyType>(
     options: HandlerOptions,
-    handler: (message: Message<MessageBodyType>) => any
-  ): Promise<Handler>;
+    handler: (message: Message<MessageBodyType>) => void | Promise<void>
+  ): Handler;
   export function handle<MessageBodyType>(
     typeName: string,
-    handler: (message: Message<MessageBodyType>) => any,
+    handler: (message: Message<MessageBodyType>) => void | Promise<void>,
     queueName?: string,
     context?: string
-  ): Promise<Handler>;
+  ): Handler;
   export function startSubscription(
     queueName: string,
     exclusive?: boolean,
@@ -80,24 +78,24 @@ declare namespace Broker {
   export function stopSubscription(): void;
 
   // Custom serializers
-  export function serialize(object: any): Buffer;
-  export function deserialize(bytes: Buffer, encoding: string): any;
+  export function serialize(object: unknown): Buffer;
+  export function deserialize(bytes: Buffer, encoding: string): unknown;
   export function addSerializer(
     contentType: string,
     serializer: {
-      deserialize: (bytes: Buffer, encoding: string) => any;
-      serialize: (object: any) => any;
+      deserialize: (bytes: Buffer, encoding: string) => unknown;
+      serialize: (object: unknown) => unknown;
     }
   ): void;
 
   // Event handler
-  export function on(event: string, handler: (...args: any[]) => void): any;
+  export function on(event: string, handler: (...args: unknown[]) => void): unknown;
 
   // Unhandled messages
-  export function onUnhandled(handler: (msg: Message<any>) => void): void;
-  export function nackUnhandled(handler: (msg: Message<any>) => void): void;
-  export function rejectUnhandled(handler: (msg: Message<any>) => void): void;
-  export function onReturned(handler: (msg: Message<any>) => void): void;
+  export function onUnhandled(handler: (msg: Message) => void): void;
+  export function nackUnhandled(): void;
+  export function rejectUnhandled(): void;
+  export function onReturned(handler: (msg: Message) => void): void;
 
   // Undocumented
   export function reset(): void;
@@ -105,7 +103,7 @@ declare namespace Broker {
   export function clearAckInterval(): void;
   export function nackOnError(): void;
   export function ignoreHandlerErrors(): void;
-  export function getExchange(name: string, connectionName?: string): any;
+  export function getExchange(name: string, connectionName?: string): unknown;
   export function batchAck(): void;
   export function unbindExchange(
     source: string,
@@ -121,31 +119,31 @@ declare namespace Broker {
   ): Promise<void>;
 
   export function log(
-    loggers: Array<{
+    loggers: {
       level: string;
       stream: {
         write(data: string): void;
       };
-    }>
+    }[]
   ): void;
 
   export const connections: Record<string, unknown>;
 
-  export interface Message<BodyType> {
-    ack(): Promise<void>;
-    nack(): Promise<void>;
-    reject(): Promise<void>;
+  export type Headers = Record<string, string | undefined>;
+
+  export interface Message<BodyType = unknown> {
+    ack(): void;
+    nack(): void;
+    reject(): void;
     reply<ReplyBodyType>(
       message: ReplyBodyType,
       options?: {
-        more: string;
-        replyType: string;
+        more?: string;
+        replyType?: string;
         contentType: string;
-        headers: {
-          [key: string]: string;
-        };
+        headers?: Headers;
       }
-    ): Promise<void>;
+    ): void;
     fields: MessageFields;
     properties: MessageProperties;
     body: BodyType;
@@ -155,6 +153,7 @@ declare namespace Broker {
     };
     type: string;
     quarantine: boolean;
+    queue?: string;
   }
 
   export interface MessageFields {
@@ -168,9 +167,7 @@ declare namespace Broker {
   export interface MessageProperties {
     contentType: string;
     contentEncoding: string;
-    headers: {
-      [key: string]: any;
-    };
+    headers: Headers;
     correlationId: string;
     replyTo: string;
     messageId: string;
@@ -182,9 +179,9 @@ declare namespace Broker {
 
   export interface ConfigurationOptions {
     connection: ConnectionOptions;
-    exchanges?: Array<ExchangeOptions>;
-    queues?: Array<QueueOptions>;
-    bindings?: Array<BindingOptions>;
+    exchanges?: ExchangeOptions[];
+    queues?: QueueOptions[];
+    bindings?: BindingOptions[];
   }
 
   export interface ConnectionOptions {
@@ -214,7 +211,7 @@ declare namespace Broker {
     waitMin?: number;
     waitMax?: number;
     waitIncrement?: number;
-    clientProperties?: any;
+    clientProperties?: unknown;
     caPath?: string;
     certPath?: string;
     keyPath?: string;
@@ -228,6 +225,7 @@ declare namespace Broker {
     queueLimit?: number;
     deadLetter?: string;
     subscribe?: boolean;
+    durable?: boolean;
   }
 
   export interface BindingOptions {
@@ -245,7 +243,7 @@ declare namespace Broker {
     durable?: boolean;
   }
 
-  export interface PublishOptions<MessageBodyType = any> {
+  export interface PublishOptions<MessageBodyType = unknown> {
     routingKey?: string;
     type?: string;
     correlationId?: string;
@@ -256,27 +254,26 @@ declare namespace Broker {
     timestamp?: number;
     mandatory?: boolean;
     persistent?: boolean;
-    headers?: {
-      [key: string]: string;
-    };
+    headers?: Headers;
     timeout?: number;
+    replyTimeout?: number;
   }
 
   export interface BulkPublishSet<MessageBodyType> {
-    [exchangeName: string]: Array<PublishOptions<MessageBodyType>>;
+    [exchangeName: string]: Omit<PublishOptions<MessageBodyType>, "replyTimeout">[];
   }
 
   export interface HandlerOptions {
     queue: string;
     type: string;
     autoNack?: boolean;
-    context?: any;
-    handler?<MessageBodyType>(msg: Message<MessageBodyType>): any;
+    context?: unknown;
+    handler?<MessageBodyType>(msg: Message<MessageBodyType>): void | Promise<void>;
   }
 
   export interface Handler {
-    <MessageBodyType>(msg: Message<MessageBodyType>): Promise<any>;
+    callback: <MessageBodyType>(msg: Message<MessageBodyType>) => void | Promise<void>;
     remove(): void;
-    catch(errorHandler: (err: any, msg: Message<any>) => void): void;
+    catch(errorHandler: (err: unknown, msg: Message) => void): void;
   }
 }
