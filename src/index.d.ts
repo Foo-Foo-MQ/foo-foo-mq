@@ -212,6 +212,7 @@ declare namespace Broker {
     failAfter?: number;
     retryLimit?: number;
     waitMin?: number;
+    waitMax?: number;
     waitIncrement?: number;
     clientProperties?: any;
     caPath?: string;
