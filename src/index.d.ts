@@ -92,6 +92,10 @@ declare namespace Broker {
 
   // Event handler
   export function on(event: string, handler: (...args: any[]) => void): any;
+  /** Remove all event subscriptions */
+  export function off(): void;
+  /** Emit an event*/
+  export function emit(topic: string, data?: any, timestamp?: Date): void;
 
   // Unhandled messages
   export function onUnhandled(handler: (msg: Message<any>) => void): void;
