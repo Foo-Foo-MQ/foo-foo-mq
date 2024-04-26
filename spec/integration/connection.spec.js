@@ -14,7 +14,7 @@ describe('Connection', function () {
     });
 
     it('should assign uri to connection', function () {
-      connected.uri.should.equal('amqp://guest:guest@127.0.0.1:5672/%2f?heartbeat=30');
+      connected.uri.should.equal('amqp://guest:guest@127.0.0.1:5672/%2f?heartbeat=30&frameMax=4096');
     });
 
     after(function () {
@@ -29,11 +29,11 @@ describe('Connection', function () {
         connected = c;
         done();
       });
-      rabbit.addConnection({ name: 'connectionWithUri', uri: 'amqp://guest:guest@127.0.0.1:5672/%2f?heartbeat=11' });
+      rabbit.addConnection({ name: 'connectionWithUri', uri: 'amqp://guest:guest@127.0.0.1:5672/%2f?heartbeat=11&frameMax=8192' });
     });
 
     it('should assign uri to connection', function () {
-      connected.uri.should.equal('amqp://guest:guest@127.0.0.1:5672/%2f?heartbeat=11');
+      connected.uri.should.equal('amqp://guest:guest@127.0.0.1:5672/%2f?heartbeat=11&frameMax=8192');
     });
 
     after(function () {

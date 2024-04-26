@@ -47,8 +47,8 @@ function getOption (opts, key, alt) {
   }
 }
 
-function getUri (protocol, user, pass, server, port, vhost, heartbeat) {
-  return `${protocol}://${user}:${pass}@${server}:${port}/${vhost}?heartbeat=${heartbeat}`;
+function getUri (protocol, user, pass, server, port, vhost, heartbeat, frameMax) {
+  return `${protocol}://${user}:${pass}@${server}:${port}/${vhost}?heartbeat=${heartbeat}&frameMax=${frameMax}`;
 }
 
 function max (x, y) {
@@ -59,6 +59,7 @@ function parseUri (uri) {
   if (uri) {
     const parsed = new url.URL(uri);
     const heartbeat = parsed.searchParams.get('heartbeat');
+    const frameMax = parsed.searchParams.get('frameMax');
     return {
       useSSL: parsed.protocol.startsWith('amqps'),
       user: decodeURIComponent(parsed.username),
@@ -66,7 +67,8 @@ function parseUri (uri) {
       host: parsed.hostname,
       port: parsed.port,
       vhost: parsed.pathname ? parsed.pathname.slice(1) : undefined,
-      heartbeat: heartbeat
+      heartbeat: heartbeat,
+      frameMax: frameMax
     };
   }
 }
@@ -108,6 +110,7 @@ const Adapter = function (parameters) {
   this.pass = getOption(parameters, 'RABBIT_PASSWORD') || getOption(parameters, 'pass', 'guest');
   this.user = getOption(parameters, 'RABBIT_USER') || getOption(parameters, 'user', 'guest');
   this.vhost = getOption(parameters, 'RABBIT_VHOST') || getOption(parameters, 'vhost', '%2f');
+  this.frameMax = getOption(parameters, 'RABBIT_FRAME_MAX') || getOption(parameters, 'frameMax', 4096);
   const timeout = getOption(parameters, 'RABBIT_TIMEOUT') || getOption(parameters, 'timeout', 2000);
   const certPath = getOption(parameters, 'RABBIT_CERT') || getOption(parameters, 'certPath');
   const keyPath = getOption(parameters, 'RABBIT_KEY') || getOption(parameters, 'keyPath');
@@ -193,7 +196,7 @@ Adapter.prototype.bumpIndex = function () {
 Adapter.prototype.getNextUri = function () {
   const server = this.getNext(this.servers);
   const port = this.getNext(this.ports);
-  const uri = getUri(this.protocol, encodeURIComponent(this.user), encodeURIComponent(this.pass), server, port, this.vhost, this.heartbeat);
+  const uri = getUri(this.protocol, encodeURIComponent(this.user), encodeURIComponent(this.pass), server, port, this.vhost, this.heartbeat, this.frameMax);
   return [uri, server];
 };
 

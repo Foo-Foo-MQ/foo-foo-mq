@@ -203,6 +203,7 @@ declare namespace Broker {
     pass?: string;
     timeout?: number;
     heartbeat?: number;
+    frameMax?: number;
     replyQueue?:
       | boolean
       | string
