@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0](https://github.com/Foo-Foo-MQ/foo-foo-mq/compare/v9.2.0...v10.0.0) (2026-06-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **support node 24, drop 18:** Dropped support for Node 18
+
+* chore(update package-lock): update package-lock
+
+### Features
+
+* **support node 24, drop 18:** add support for Node 24, drop support for 18 ([88a6056](https://github.com/Foo-Foo-MQ/foo-foo-mq/commit/88a6056c009a16ff8144324a23ac8e939a400132))
+
+
+### Bug Fixes
+
+* **package-lock.json:** install peer flag resolution ([7b5b26d](https://github.com/Foo-Foo-MQ/foo-foo-mq/commit/7b5b26d3aed03d6392a8feb83d61cf315c029373))
+
 ## [9.2.0](https://github.com/Foo-Foo-MQ/foo-foo-mq/compare/v9.1.0...v9.2.0) (2024-11-14)
 
 
